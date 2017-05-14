@@ -1,0 +1,236 @@
+<!doctype html>
+<html>
+<head>
+<style>
+* { margin: 0; padding: 0; box-sizing : border-box; }
+body { font: 13px Helvetica, Arial; }
+form { background: # 000; padding: 3px; position: fixed; bottom: 0; width: 100% ; }
+form input { border: 0; padding: 10px; width: 80% ; margin-right : .5% ; }
+form button { width: 15% ; background: rgb(143, 188, 143); border: none; padding: 10px; }
+#messages{list-style-type : none; margin : 0; padding : 0; }
+#messages li{padding : 5px 10px; }
+#messages li : nth-child(odd){background : #eee; }
+#messages {margin-bottom : 40px }
+#messages {font-size : 2em }
+#btn1 {position : fixed; top : 10px; left :  10px; font-size : 2em; background-color: darkseagreen }
+#btn2 {position : fixed; top : 10px; left :  60px; font-size : 2em; background-color: darkseagreen }
+#btn3 {position : fixed; top : 10px; left : 150px; font-size : 2em; background-color: cornsilk }
+#btn4 {position : fixed; top : 10px; left : 230px; font-size : 2em; background-color: cornsilk }
+#btn5 {position : fixed; top : 10px; left : 310px; font-size : 2em; background-color: paleturquoise }
+#btn6 {position : fixed; top : 10px; left : 390px; font-size : 2em; background-color: paleturquoise }
+#btn7 {position : fixed; top : 10px; left : 470px; font-size : 2em; background-color: thistle }
+#btn8 {position : fixed; top : 10px; left : 550px; font-size : 2em; background-color: thistle }
+#mycanvas0 {position : fixed; top :  70px; left :  10px; font-size : 2em }
+#mycanvas1 {position : fixed; top :  90px; left :  10px; font-size : 2em }
+#mycanvas2 {position : fixed; top : 620px; left :  10px; font-size : 2em }
+</style>
+</head>
+
+<body>
+    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+    <script src='/socket.io/socket.io.js'></script>
+    <script src="https://code.createjs.com/createjs-2015.11.26.min.js"></script>
+
+    <button id="btn1"><font size="5">CQ</font></button>
+    <button id="btn2"><font size="5">QRZ?</font></button>
+    <button id="btn3"><font size="5">VFO+</font></button>
+    <button id="btn4"><font size="5">VFO-</font></button>
+    <button id="btn5"><font size="5">BFO+</font></button>
+    <button id="btn6"><font size="5">BFO-</font></button>
+    <button id="btn7"><font size="5">BFO+</font></button>
+    <button id="btn8"><font size="5">BFO-</font></button>
+
+    <div id="messages"></div>
+    <form action="">
+      <input id="m" autocomplete="off"/><button>Send</button>
+    </form>
+    <canvas id="mycanvas0" width="512" height= "20" style="background:white;"></canvas>
+    <canvas id="mycanvas1" width="512" height="512" style="background:white;"></canvas>
+    <canvas id="mycanvas2" width="280" height= "60" style="background:cornsilk;"></canvas>
+
+<script>
+
+function colormap(charcode) {  // 0x00~0xff
+  var tmp = charcode / 255.0;  // 0.0~1.0
+  var val;
+  var r, g, b;
+  if (tmp < 0.50) {
+    r = 0.0;
+  } else if (tmp > 0.75) {
+    r = 1.0;
+  } else {
+    r = 4.0 * tmp - 2.0;
+  }
+
+  if (tmp < 0.25) {
+    g = 4.0 * tmp;
+  } else if (tmp > 0.75) {
+    g = -4.0 * tmp + 4.0;
+  } else {
+    g = 1.0;
+  }
+
+  if (tmp < 0.25) {
+    b = 1.0;
+  } else if (tmp > 0.50) {
+    b = 0.0;
+  } else {
+    b = -4.0 * tmp + 2.0;
+  }
+
+  rgb[1] = 255.0 * g;
+  rgb[0] = 255.0 * r;
+  rgb[2] = 255.0 * b;
+}
+
+function waterFall(myarray) {
+  ctx1.putImageData(imgData1, 0, 1);
+  imgData1 = ctx1.getImageData(0, 0, 512, 512);
+  for (j = 0; j < 512; j++) {
+    colormap(myarray[j]);
+    imgData1.data[0 + j * 4] = rgb[0];
+    imgData1.data[1 + j * 4] = rgb[1];
+    imgData1.data[2 + j * 4] = rgb[2];
+    imgData1.data[3 + j * 4] = 255;
+  }
+}
+
+function showBpf(ctx0, imgData0, bfo) {
+  var cwmarker0 = Math.floor( bfo[0]  / (16000 / 2048) );
+  var cwmarker1 = Math.floor( bfo[1]  / (16000 / 2048) );
+  console.log('bfo = ', bfo);
+  
+  for (i = 0; i < 20; i++) {
+    for (j = 0; j < 512; j++) {
+      var r, g, b, a;
+      if(j == cwmarker0 || j == cwmarker1) {
+        r = 0; g = 0; b = 0;
+      } else if ( j >= cwmarker0-20 && j <= cwmarker0+20 && i > 10) {
+        r = 135; g = 206; b= 235;
+      } else if ( j >= cwmarker1-20 && j <= cwmarker1+20 && i > 10) {
+        r = 216; g = 191; b= 216;
+      } else {
+        r = 255; g = 255; b= 255;
+      }
+      imgData0.data[0 + j * 4 + i * imgData0.width * 4] =   r;
+      imgData0.data[1 + j * 4 + i * imgData0.width * 4] =   g;
+      imgData0.data[2 + j * 4 + i * imgData0.width * 4] =   b;
+      imgData0.data[3 + j * 4 + i * imgData0.width * 4] = 255;
+    }
+  }
+  ctx0.putImageData(imgData0, 0, 0);
+}
+
+function onClick(e) {
+  var rect = e.target.getBoundingClientRect();
+  var mx   = e.clientX - rect.left;
+  var my   = e.clientY - rect.top;
+  console.log('mouse clicked: ', mx, my);
+  socket.emit('message77', mx);
+}
+
+/*
+function playChunk(audio_src, scheduled_time) {
+        audio_src.start(scheduled_time);
+}
+*/
+
+function playAudioStream(ctx, audio_f32) {
+    var audio_buf    = ctx.createBuffer(1, audio_f32.length, 16000);
+    var audio_src    = ctx.createBufferSource();
+    var current_time = ctx.currentTime;
+
+    audio_buf.getChannelData(0).set(audio_f32);
+
+    audio_src.buffer = audio_buf;
+    audio_src.connect(ctx.destination);
+
+    if (current_time < scheduled_time) {
+//        playChunk(audio_src, scheduled_time);
+        audio_src.start(scheduled_time);
+        scheduled_time += audio_buf.duration;
+    } else {
+//        playChunk(audio_src, current_time);
+        audio_src.start(current_time);
+        scheduled_time = current_time + audio_buf.duration;
+    }
+}
+
+// main
+
+var socket  = io();
+
+var myarray = new Array();
+var canvas0, canvas1, canvas2;
+var ctx0, ctx1;
+var imgData0, imgData1;
+var rgb = new Array(3);
+
+canvas0 = document.getElementById('mycanvas0');
+canvas1 = document.getElementById('mycanvas1');
+ctx0    = canvas0.getContext('2d');
+ctx1    = canvas1.getContext('2d');
+
+canvas1.addEventListener('click', onClick, false);
+
+imgData0 = ctx0.createImageData(512,  20);
+imgData1 = ctx1.createImageData(512, 512);
+
+var stage = new createjs.Stage("mycanvas2");
+var t     = new createjs.Text("IC-7410", "26px serif", "DarkRed");
+t.x       = 10;
+t.y       = 10;
+stage.addChild(t);
+stage.update();
+
+var bfo      = [1000.0, 2000.0];
+showBpf(ctx0, imgData0, bfo);
+
+for (i = 0; i < 512; i++) {
+  for (j = 0; j < 512; j++) {
+    imgData1.data[0 + j * 4 + i * imgData1.width * 4] = j % 256;
+    imgData1.data[1 + j * 4 + i * imgData1.width * 4] = i % 256;
+    imgData1.data[2 + j * 4 + i * imgData1.width * 4] = 128;
+    imgData1.data[3 + j * 4 + i * imgData1.width * 4] = 255;
+  }
+}
+ctx1.putImageData(imgData1, 0, 0);
+
+var audioCtx = new AudioContext;
+var scheduled_time = 0;
+
+socket.on('your message', function(msg) {
+  $('#messages').append($('<div>').text(msg));
+  window.scrollTo(0, document.body.scrollHeight);
+});
+
+socket.on('waterfall', function(data) {
+  waterFall(data);
+});
+
+socket.on('sound'    , function(data) {
+  playAudioStream(audioCtx, new Float32Array(data));
+});
+
+socket.on('freqmsg', function(msg) {
+  t.text = msg;
+  stage.update();
+});
+
+$('#btn1').click(function() { socket.emit('message1'); console.log('message1'); });
+$('#btn2').click(function() { socket.emit('message2'); console.log('message2'); });
+$('#btn3').click(function() { socket.emit('message3'); console.log('message3'); });
+$('#btn4').click(function() { socket.emit('message4'); console.log('message4'); });
+$('#btn5').click(function() { socket.emit('message5'); bfo[0]+=100; showBpf(ctx0, imgData0, bfo);});
+$('#btn6').click(function() { socket.emit('message6'); bfo[0]-=100; showBpf(ctx0, imgData0, bfo);});
+$('#btn7').click(function() { socket.emit('message7'); bfo[1]+=100; showBpf(ctx0, imgData0, bfo);});
+$('#btn8').click(function() { socket.emit('message8'); bfo[1]-=100; showBpf(ctx0, imgData0, bfo);});
+
+$('form').submit(function() {
+  socket.emit('your message', $('#m').val());
+  $('#m').val('');
+  return false;
+});
+</script>
+</body>
+</html>
