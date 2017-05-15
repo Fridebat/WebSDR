@@ -23,7 +23,7 @@ var app   = http.createServer(function(req, res) {
               .listen(3000);
 var io    = require('socket.io').listen(app);
 
-var freqHz  = 0;          // VFO-A frequency
+var freqHz  = 0;          // VFO frequency
 var ndata   = 512 + 2048; // waterfall_data[512] + sound_data[2048]
 var pos     = 0;
 var myarray = new Array();
@@ -74,10 +74,10 @@ serial.on('data', function(data) {
     var f1m   = data[8] & 0x0f;
     var freq  = f10m.toString() + f1m.toString() + "," + f100k.toString() +
                 f10k.toString() + f1k.toString() + "." + f100.toString()  +
-                f10.toString()  + f1 + " kHz";
+                f10.toString()  + f1.toString()  + "kHz";
     freqHz = f10m * 10000000 + f1m * 1000000 + f100k * 100000 + f10k * 10000 +
              f1k * 1000 + f100 * 100 + f10 * 10 + f1;
-    io.emit('freqmsg', 'VFO A: ' + freq);
+    io.emit('freqmsg', 'VFO: ' + freq);
   }
 });
  
@@ -113,35 +113,47 @@ io.on('connection', function(socket) {
   socket.on('message2', function() { serial.write(buf2); });
  
   socket.on('message3', function() {
-    var newfreq = freqHz + 2000;
+    var newfreq = freqHz - 10000;
     setfreq(newfreq);
   });
- 
+
   socket.on('message4', function() {
-    var newfreq = freqHz - 2000;
+    var newfreq = freqHz - 5000;
     setfreq(newfreq);
   });
  
   socket.on('message5', function() {
-    console.log('0'); // should be stdout to reach sprig_audio
+    var newfreq = freqHz - 2000;
+    setfreq(newfreq);
   });
  
   socket.on('message6', function() {
-    console.log('1'); // should be stdout to reach sprig_audio
+    var newfreq = freqHz + 2000;
+    setfreq(newfreq);
   });
  
   socket.on('message7', function() {
-    console.log('2'); // should be stdout to reach sprig_audio
+    var newfreq = freqHz + 5000;
+    setfreq(newfreq);
   });
  
   socket.on('message8', function() {
-    console.log('3'); // should be stdout to reach sprig_audio
+    var newfreq = freqHz + 10000;
+    setfreq(newfreq);
   });
  
-  var cwpitch = 650.0;
+// the following console.log() are to send signal to sprig_audio
+
+  socket.on('message66', function(cwpitch) {
+    console.log('b', cwpitch);
+  });
+
+  socket.on('message67', function(cwpitch) {
+    console.log('c', cwpitch);
+  });
+
   socket.on('message77', function(mx) {
-    var newfreq = freqHz - (16000/2048 * mx - cwpitch);
-    setfreq(newfreq);
+    console.log('a', mx);
   });
 
   socket.on('your message', function(msg) {

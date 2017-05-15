@@ -1,6 +1,46 @@
 <!doctype html>
 <html>
 <head>
+
+
+
+  <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+  <link rel="stylesheet" href="/resources/demos/style.css">
+  <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+  <script src="https://code.createjs.com/createjs-2015.11.26.min.js"></script>
+  <script src='/socket.io/socket.io.js'></script>
+
+  <script>
+  $( function() {
+    $( "#slider1" ).slider({
+      value:400,
+      min: 300,
+      max: 800,
+      step: 50,
+      slide: function( event, ui ) {
+      cwpitch[0] = ui.value;
+      socket.emit('message66', cwpitch[0]);
+      }
+    });
+  } );
+  </script>
+
+  <script>
+  $( function() {
+    $( "#slider2" ).slider({
+      value:600,
+      min: 300,
+      max: 800,
+      step: 50,
+      slide: function( event, ui ) {
+      cwpitch[1] = ui.value;
+      socket.emit('message67', cwpitch[1]);
+      }
+    });
+  } );
+  </script>
+
 <style>
 * { margin: 0; padding: 0; box-sizing : border-box; }
 body { font: 13px Helvetica, Arial; }
@@ -12,33 +52,44 @@ form button { width: 15% ; background: rgb(143, 188, 143); border: none; padding
 #messages li : nth-child(odd){background : #eee; }
 #messages {margin-bottom : 40px }
 #messages {font-size : 2em }
+#radio1 {position : fixed; top : 70px; left :  40px; font-size : 2em; background-color: paleturquoise }
+#radio2 {position : fixed; top : 70px; left : 300px; font-size : 2em; background-color: thistle }
+#slider1 {position : fixed; top :120px; left :  40px; width: 220px; height: 20px; background-color: paleturquoise }
+#slider2 {position : fixed; top :120px; left : 300px; width: 220px; height: 20px; background-color: thistle }
 #btn1 {position : fixed; top : 10px; left :  10px; font-size : 2em; background-color: darkseagreen }
 #btn2 {position : fixed; top : 10px; left :  60px; font-size : 2em; background-color: darkseagreen }
 #btn3 {position : fixed; top : 10px; left : 150px; font-size : 2em; background-color: cornsilk }
-#btn4 {position : fixed; top : 10px; left : 230px; font-size : 2em; background-color: cornsilk }
-#btn5 {position : fixed; top : 10px; left : 310px; font-size : 2em; background-color: paleturquoise }
-#btn6 {position : fixed; top : 10px; left : 390px; font-size : 2em; background-color: paleturquoise }
-#btn7 {position : fixed; top : 10px; left : 470px; font-size : 2em; background-color: thistle }
-#btn8 {position : fixed; top : 10px; left : 550px; font-size : 2em; background-color: thistle }
-#mycanvas0 {position : fixed; top :  70px; left :  10px; font-size : 2em }
-#mycanvas1 {position : fixed; top :  90px; left :  10px; font-size : 2em }
-#mycanvas2 {position : fixed; top : 620px; left :  10px; font-size : 2em }
+#btn4 {position : fixed; top : 10px; left : 220px; font-size : 2em; background-color: cornsilk }
+#btn5 {position : fixed; top : 10px; left : 280px; font-size : 2em; background-color: cornsilk }
+#btn6 {position : fixed; top : 10px; left : 340px; font-size : 2em; background-color: cornsilk }
+#btn7 {position : fixed; top : 10px; left : 400px; font-size : 2em; background-color: cornsilk }
+#btn8 {position : fixed; top : 10px; left : 470px; font-size : 2em; background-color: cornsilk }
+#mycanvas0 {position : fixed; top : 170px; left :  10px; font-size : 2em }
+#mycanvas1 {position : fixed; top : 190px; left :  10px; font-size : 2em }
+#mycanvas2 {position : fixed; top : 720px; left :  10px; font-size : 2em }
 </style>
 </head>
 
 <body>
-    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
-    <script src='/socket.io/socket.io.js'></script>
-    <script src="https://code.createjs.com/createjs-2015.11.26.min.js"></script>
 
     <button id="btn1"><font size="5">CQ</font></button>
     <button id="btn2"><font size="5">QRZ?</font></button>
-    <button id="btn3"><font size="5">VFO+</font></button>
-    <button id="btn4"><font size="5">VFO-</font></button>
-    <button id="btn5"><font size="5">BFO+</font></button>
-    <button id="btn6"><font size="5">BFO-</font></button>
-    <button id="btn7"><font size="5">BFO+</font></button>
-    <button id="btn8"><font size="5">BFO-</font></button>
+    <button id="btn3"><font size="5">-10k</font></button>
+    <button id="btn4"><font size="5">-5k</font></button>
+    <button id="btn5"><font size="5">-2k</font></button>
+    <button id="btn6"><font size="5">+2k</font></button>
+    <button id="btn7"><font size="5">+5k</font></button>
+    <button id="btn8"><font size="5">+10k</font></button>
+
+    <div id="radio1">
+    <input type="radio" id="r1" name="bfo" value="0" style="width:25px; height:25px" checked="checked">
+    <label for="r1">BFO-A</label>
+    </div>
+
+    <div id="radio2">
+    <input type="radio" id="r2" name="bfo" value="1" style="width:25px; height:25px">
+    <label for="r2">BFO-B</label>
+    </div>
 
     <div id="messages"></div>
     <form action="">
@@ -46,9 +97,18 @@ form button { width: 15% ; background: rgb(143, 188, 143); border: none; padding
     </form>
     <canvas id="mycanvas0" width="512" height= "20" style="background:white;"></canvas>
     <canvas id="mycanvas1" width="512" height="512" style="background:white;"></canvas>
-    <canvas id="mycanvas2" width="280" height= "60" style="background:cornsilk;"></canvas>
+    <canvas id="mycanvas2" width="512" height="120" style="background:cornsilk;"></canvas>
+
+<div id="slider1"></div>
+<div id="slider2"></div>
 
 <script>
+
+$(function() {
+  $('input[type="radio"]').change(function() {
+    bfo_id = $(this).val();
+  });
+});
 
 function colormap(charcode) {  // 0x00~0xff
   var tmp = charcode / 255.0;  // 0.0~1.0
@@ -98,7 +158,6 @@ function waterFall(myarray) {
 function showBpf(ctx0, imgData0, bfo) {
   var cwmarker0 = Math.floor( bfo[0]  / (16000 / 2048) );
   var cwmarker1 = Math.floor( bfo[1]  / (16000 / 2048) );
-  console.log('bfo = ', bfo);
   
   for (i = 0; i < 20; i++) {
     for (j = 0; j < 512; j++) {
@@ -125,15 +184,11 @@ function onClick(e) {
   var rect = e.target.getBoundingClientRect();
   var mx   = e.clientX - rect.left;
   var my   = e.clientY - rect.top;
-  console.log('mouse clicked: ', mx, my);
-  socket.emit('message77', mx);
+  console.log('mouse clicked: ', mx + 1000*bfo_id);
+  socket.emit('message77', mx + 1000*bfo_id);
+  bfo[bfo_id] = Math.floor( 16000.0 * (mx / 2048.0) );
+  showBpf(ctx0, imgData0, bfo);
 }
-
-/*
-function playChunk(audio_src, scheduled_time) {
-        audio_src.start(scheduled_time);
-}
-*/
 
 function playAudioStream(ctx, audio_f32) {
     var audio_buf    = ctx.createBuffer(1, audio_f32.length, 16000);
@@ -146,11 +201,9 @@ function playAudioStream(ctx, audio_f32) {
     audio_src.connect(ctx.destination);
 
     if (current_time < scheduled_time) {
-//        playChunk(audio_src, scheduled_time);
         audio_src.start(scheduled_time);
         scheduled_time += audio_buf.duration;
     } else {
-//        playChunk(audio_src, current_time);
         audio_src.start(current_time);
         scheduled_time = current_time + audio_buf.duration;
     }
@@ -165,6 +218,7 @@ var canvas0, canvas1, canvas2;
 var ctx0, ctx1;
 var imgData0, imgData1;
 var rgb = new Array(3);
+var bfo_id = 0;
 
 canvas0 = document.getElementById('mycanvas0');
 canvas1 = document.getElementById('mycanvas1');
@@ -183,7 +237,8 @@ t.y       = 10;
 stage.addChild(t);
 stage.update();
 
-var bfo      = [1000.0, 2000.0];
+var bfo      = [ 500.0, 2000.0];
+var cwpitch  = [ 400.0,  600.0];
 showBpf(ctx0, imgData0, bfo);
 
 for (i = 0; i < 512; i++) {
@@ -213,7 +268,9 @@ socket.on('sound'    , function(data) {
 });
 
 socket.on('freqmsg', function(msg) {
-  t.text = msg;
+  t.text = msg + "\n"
+         + "BFO-A: " + bfo[0] + "Hz  (" + cwpitch[0] + "Hz)\n"
+         + "BFO-B: " + bfo[1] + "Hz  (" + cwpitch[1] + "Hz)\n"
   stage.update();
 });
 
@@ -221,10 +278,10 @@ $('#btn1').click(function() { socket.emit('message1'); console.log('message1'); 
 $('#btn2').click(function() { socket.emit('message2'); console.log('message2'); });
 $('#btn3').click(function() { socket.emit('message3'); console.log('message3'); });
 $('#btn4').click(function() { socket.emit('message4'); console.log('message4'); });
-$('#btn5').click(function() { socket.emit('message5'); bfo[0]+=100; showBpf(ctx0, imgData0, bfo);});
-$('#btn6').click(function() { socket.emit('message6'); bfo[0]-=100; showBpf(ctx0, imgData0, bfo);});
-$('#btn7').click(function() { socket.emit('message7'); bfo[1]+=100; showBpf(ctx0, imgData0, bfo);});
-$('#btn8').click(function() { socket.emit('message8'); bfo[1]-=100; showBpf(ctx0, imgData0, bfo);});
+$('#btn5').click(function() { socket.emit('message5'); console.log('message5'); });
+$('#btn6').click(function() { socket.emit('message6'); console.log('message6'); });
+$('#btn7').click(function() { socket.emit('message7'); console.log('message7'); });
+$('#btn8').click(function() { socket.emit('message8'); console.log('message8'); });
 
 $('form').submit(function() {
   socket.emit('your message', $('#m').val());
