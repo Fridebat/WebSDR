@@ -1,9 +1,7 @@
 <!doctype html>
 <html>
 <head>
-
-
-
+  <title>WebSDR</title>
   <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
   <link rel="stylesheet" href="/resources/demos/style.css">
   <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
@@ -66,7 +64,8 @@ form button { width: 15% ; background: rgb(143, 188, 143); border: none; padding
 #btn8 {position : fixed; top : 10px; left : 470px; font-size : 2em; background-color: cornsilk }
 #mycanvas0 {position : fixed; top : 170px; left :  10px; font-size : 2em }
 #mycanvas1 {position : fixed; top : 190px; left :  10px; font-size : 2em }
-#mycanvas2 {position : fixed; top : 720px; left :  10px; font-size : 2em }
+#mycanvas2 {position : fixed; top : 712px; left :  10px; font-size : 2em }
+#mycanvas3 {position : fixed; top : 842px; left :  10px; font-size : 2em }
 </style>
 </head>
 
@@ -97,7 +96,8 @@ form button { width: 15% ; background: rgb(143, 188, 143); border: none; padding
     </form>
     <canvas id="mycanvas0" width="512" height= "20" style="background:white;"></canvas>
     <canvas id="mycanvas1" width="512" height="512" style="background:white;"></canvas>
-    <canvas id="mycanvas2" width="512" height="120" style="background:cornsilk;"></canvas>
+    <canvas id="mycanvas2" width="512" height="120" style="background:lavender;"></canvas>
+    <canvas id="mycanvas3" width="512" height="120" style="background:blue;"></canvas>
 
 <div id="slider1"></div>
 <div id="slider2"></div>
@@ -237,6 +237,8 @@ t.y       = 10;
 stage.addChild(t);
 stage.update();
 
+var stage3 = new createjs.Stage("mycanvas3");
+
 var bfo      = [ 500.0, 2000.0];
 var cwpitch  = [ 400.0,  600.0];
 showBpf(ctx0, imgData0, bfo);
@@ -265,6 +267,25 @@ socket.on('waterfall', function(data) {
 
 socket.on('sound'    , function(data) {
   playAudioStream(audioCtx, new Float32Array(data));
+
+// waveform
+
+ var g = new createjs.Graphics();
+ g.setStrokeStyle(1);
+ g.beginStroke("#ffffff");
+ g.moveTo(0,10); g.lineTo(511,10);
+ g.moveTo(0,110); g.lineTo(511,110);
+ g.beginStroke("#ffff00");
+ g.moveTo(0,60); g.lineTo(511,60);
+ g.moveTo(0,60);
+  for (j = 0; j<512; j++) {
+    g.lineTo(j,60-50*data[j]);
+  }
+var s = new createjs.Shape(g);
+stage3.addChild(s);
+stage3.update();
+stage3.removeChild(s);
+
 });
 
 socket.on('freqmsg', function(msg) {

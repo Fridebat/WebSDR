@@ -43,7 +43,7 @@ process.stdin.on('readable', function() { // from spinor_audio
           }
           for(var j=0;j<2048;j++) {    // sound_data
             var tmp = myarray[j+512];
-            if (tmp>128) tmp -=256;
+            if (tmp>=128) tmp -=256;
             mysound   [j] = tmp / 128.0; // signed char to -1.0~+1.0
           }
           io.emit('waterfall', mywater);
